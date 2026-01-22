@@ -1,0 +1,23 @@
+export const LOCAL_STORAGE_API_TOKEN = "api_token"
+export const LOCAL_STORAGE_EXP_TOKEN = "exp_token"
+export const LOCAL_STORAGE_USER_ID = "user_id"
+export const LOCAL_STORAGE_API_REFRESH_TOKEN = "refresh_token"
+export const LOCAL_STORAGE_MESSAGE_TYPE = "message_type"
+export const LOCAL_STORAGE_MESSAGE = "message"
+export const LOCAL_STORAGE_DEVICE = "device"
+export const LOCAL_STORAGE_PREFIX = "prefix"
+export const LOCAL_STORAGE_SUFFIX = "suffix"
+export const LOCAL_STORAGE_THOUSAND = "thousand_separator"
+export const LOCAL_STORAGE_DECIMAL = "decimal_separator"
+export const LOCAL_STORAGE_SCALE = "decimal_scale"
+export const LOCAL_STORAGE_SWITCH_VIEW = "switch_view"
+export const LOCAL_STORAGE_TIMEOUT = "login_timeout"
+export const LOCAL_STORAGE_DEV_ID = "dev_id"
+export const LOCAL_STORAGE_STOP_TIMEOUT = "stop_timeout"
+export const LOCAL_STORAGE_TAX = "tax"
+export const LOCAL_STORAGE_ADDRESS = "address"
+export const LOCAL_STORAGE_DEPO_GROUP = "depo_group"
+
+export const uploadPathStorage = {
+    photoProfile: "photo-profile"
+}

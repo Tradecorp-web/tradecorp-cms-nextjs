@@ -1,0 +1,6 @@
+export const baseContainerSize = ["All", 20, 40]
+export const baseContainerType = ['GP', 'HC', 'OT', 'FR', 'FP', 'REEFER', 'ISO TANK']
+export const baseContainerStatus = ['Hold', 'Sale Stock', 'Sold', 'On Hire']
+export const baseContainerCondition = ['ASIS', 'Cargo Worthy', 'IICL', 'New']
+export const baseContainerStatusRepair = ['AV', 'DM']
+export const baseLocation = ['Cakung', 'Surabaya', 'Palembang']

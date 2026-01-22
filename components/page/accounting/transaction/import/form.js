@@ -1,0 +1,388 @@
+import {
+  Button,
+  Card,
+  Grid,
+  MenuItem,
+  Modal,
+  Typography,
+  Box,
+  TextField,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Checkbox,
+  makeStyles,
+  Backdrop,
+  CircularProgress,
+  Icon,
+  InputAdornment,
+  TableHead,
+  TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+} from "@material-ui/core";
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import { Delete, Add } from "@material-ui/icons";
+import React, { useEffect, useState } from "react";
+import {
+  getCoaParentDetailApi,
+  saveCoaApi,
+} from "../../../../../services/api/coa.api";
+import { currency } from "../../../../../helpers/general";
+import Moment, { calendarFormat } from "moment";
+
+import { getListCoaSwr } from "../../../../../services/swr/coa.swr";
+import { getListCoaTypeSwr } from "../../../../../services/swr/coa-type.swr";
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    margin: "auto",
+  },
+  paper: {
+    width: 250,
+    height: 300,
+    overflow: "auto",
+  },
+  button: {
+    margin: theme.spacing(0.5, 0),
+  },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: "#fff",
+  },
+}));
+
+export default function AccMapForm(props) {
+  const classes = useStyles();
+  const [optionCoaParent, setOptionCoaParent] = useState([]);
+  const [CoaParentTmp, setCoaParentTmp] = useState([]);
+  const [CoaNameParentTmp, setCoaNameParentTmp] = useState([]);
+  const [selectedCoaParent, setSelectedCoaParent] = useState([]);
+
+  const [optionCoaType, setOptionCoaType] = useState([]);
+  const [selectedCoaType, setSelectedCoaType] = useState([]);
+
+  const [coaParentList, setCoaParentList] = useState([]);
+  const [coaTypeList, setCoaTypeList] = useState([]);
+
+  const [errorText, setErrorText] = useState({
+    coa_code: null,
+    coa_name: null,
+    coa_type: null,
+    coa_parent: null,
+  });
+
+  const [isLoading, setLoading] = useState(false);
+
+  const [data, setData] = useState({
+    id: null,
+    coa_code: null,
+    coa_name: null,
+    coa_type: null,
+    coa_parent: null,
+    coa_description: null,
+  });
+
+  const [title, setTitle] = useState({ formTitle: "", buttonTitle: "" });
+
+  const onInputChange = (event) => {
+    setData({ ...data, [event.target.name]: event.target.value });
+  };
+
+  const onCoaParentChange = (event, value, extra) => {
+    if (value != null) {
+      var objekval = Object.values(value);
+      var coa_code_parent = objekval[1].split("-");
+      data.coa_parent = coa_code_parent[0].trim();
+      setSelectedCoaParent({
+        id: objekval[0],
+        label: objekval[1],
+      });
+    } else {
+      data.coa_parent = "";
+      setSelectedCoaParent({
+        id: "",
+        label: "",
+      });
+    }
+  };
+  const getCoaParent = async (id) => {
+    if (id != undefined) {
+      var result = await getCoaParentDetailApi(id);
+      setSelectedCoaParent({
+        id: result.coa_code,
+        label: result.coa_code + " - " + result.coa_name,
+      });
+      setCoaParentTmp(result.coa_code);
+      setCoaNameParentTmp(result.coa_code + " - " + result.coa_name);
+    } else {
+      setSelectedCoaParent({
+        id: "",
+        label: "",
+      });
+    }
+  };
+
+  //coa type
+
+  useEffect(() => {
+    if (props.coa != null) {
+      setData({
+        id: props.coa.id,
+        coa_code: props.coa.coa_code,
+        coa_name: props.coa.coa_name,
+        coa_type: props.coa.coa_type,
+        coa_parent: props.coa.coa_parent,
+        coa_description: props.coa.coa_description,
+      });
+
+      if (
+        props.coa.coa_parent != undefined ||
+        props.coa.coa_parent != "" ||
+        props.coa.coa_parent != null
+      ) {
+        getCoaParent(props.coa.coa_parent);
+        setSelectedCoaType({
+          id: props.coa.coa_type,
+          label: props.coa.coa_type,
+        });
+      }
+      clearForm();
+      setTitle({ formTitle: "Edit Chart of Account", buttonTitle: "Save" });
+    } else {
+      setData({
+        id: null,
+        coa_code: null,
+        coa_name: null,
+        coa_type: null,
+        coa_parent: null,
+        coa_description: null,
+      });
+      setSelectedCoaParent({
+        id: "",
+        label: "",
+      });
+      clearForm();
+      setTitle({ formTitle: "Acc Map Form", buttonTitle: "Create" });
+    }
+  }, [props.open]);
+
+  function clearForm() {
+    errorText.coa_code = "";
+    errorText.coa_name = "";
+    errorText.coa_type = "";
+    errorText.coa_parent = "";
+  }
+  let param = { limit: 999 };
+  //paren coa
+  var coaSwr = getListCoaSwr(param);
+  useEffect(() => {
+    if (coaSwr?.data) {
+      setCoaParentList(coaSwr?.data.result ?? []);
+    }
+  }, [coaSwr]);
+
+  useEffect(() => {
+    var list = [];
+    list.push({ id: "", label: "" });
+    coaParentList.map((item, i) => {
+      list.push({ id: item.id, label: item.coa_code + " - " + item.coa_name });
+    });
+    setOptionCoaParent(list);
+  }, [coaParentList]);
+  //==>parent coa
+
+  //Coa type
+  const onCoaTypeChange = (event, value, extra) => {
+    if (value != null) {
+      var objekval = Object.values(value);
+      data.coa_type = objekval[0].trim();
+      setSelectedCoaType({
+        id: objekval[0],
+        label: objekval[1],
+      });
+    } else {
+      data.coa_type = "";
+      setSelectedCoaType({
+        id: "",
+        label: "",
+      });
+    }
+  };
+
+  var coaTypeSwr = getListCoaTypeSwr(param);
+  useEffect(() => {
+    if (coaTypeSwr?.data) {
+      setCoaTypeList(coaTypeSwr?.data.result ?? []);
+    }
+  }, [coaTypeSwr]);
+
+  useEffect(() => {
+    var list = [];
+    list.push({ id: "", label: "" });
+    coaTypeList.map((item, i) => {
+      list.push({ id: item.coa_type, label: item.coa_type });
+    });
+    setOptionCoaType(list);
+  }, [coaTypeList]);
+  //==>Coa Type
+  function checkValidation() {
+    var isValid = true;
+    var eCoaCode = "",
+      eCoaName = "",
+      eCoaType = "",
+      eCoaParent = "";
+    if (data.coa_code == "" || data.coa_code == null) {
+      isValid = false;
+      eCoaCode = "Coa Code can not be empty";
+    }
+    if (data.coa_name == "" || data.coa_name == null) {
+      isValid = false;
+      eCoaName = "Name not be empty";
+    }
+    if (data.coa_type == "" || data.coa_type == null) {
+      isValid = false;
+      eCoaType = "Type can not be empty";
+    }
+    if (
+      data.coa_parent != "" &&
+      parseInt(data.coa_parent) >= parseInt(data.coa_code)
+    ) {
+      setSelectedCoaParent({
+        id: CoaParentTmp,
+        label: CoaNameParentTmp,
+      });
+      isValid = false;
+      eCoaParent = "Coa Parent higer level then Coa Code";
+    }
+
+    setErrorText({
+      ...errorText,
+      coa_code: eCoaCode,
+      coa_name: eCoaName,
+      coa_type: eCoaType,
+      coa_parent: eCoaParent,
+    });
+    return isValid;
+  }
+
+  const sendData = () => {
+    if (checkValidation()) {
+      setLoading(true);
+      saveCoaApi(data)
+        .then((res) => {
+          setData({
+            id: null,
+            coa_code: null,
+            coa_name: null,
+            coa_type: null,
+            coa_parent: null,
+            coa_description: null,
+          });
+          setLoading(false);
+          props?.closeModal();
+        })
+        .catch((err) => {
+          console.log(err);
+          setErrorText(err);
+          setLoading(false);
+        });
+    }
+  };
+
+  const closeForm = () => {
+    setData({
+      id: null,
+      coa_code: null,
+      coa_name: null,
+      coa_type: null,
+      coa_parent: null,
+      coa_description: null,
+    });
+    props?.closeModal();
+  };
+
+  return (
+    <Modal
+      open={props?.open}
+      onClose={closeForm}
+      aria-labelledby="simple-modal-title"
+      aria-describedby="simple-modal-description"
+    >
+      <Box className="modal-wrapper" style={{ width: "1000px" }}>
+        <Card className="modal">
+          <Box className="modal-header">
+            <Box className="me-3" style={{ width: "100%" }}>
+              <Grid container>
+                <Grid item xs={11} direction="column">
+                  <h3>{title.formTitle}</h3>
+                </Grid>
+                <Grid item xs={1} direction="column">
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    style={{ display: "flex", justifyContent: "right" }}
+                    onClick={closeForm}
+                    color="default"
+                  >
+                    <Icon className="me-2">close</Icon>
+                  </Button>
+                </Grid>
+              </Grid>
+            </Box>
+          </Box>
+          <Box className="modal-content">
+            <TableContainer component={Card}>
+              <Table aria-label="simple table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>No</TableCell>
+                    <TableCell>Transaction Code</TableCell>
+                    <TableCell>Description</TableCell>
+                    <TableCell>Acc COA Debet</TableCell>
+                    <TableCell>Acc COA Credit</TableCell>
+                    <TableCell />
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableCell>1</TableCell>
+                  <TableCell>trx-acc-po-map</TableCell>
+                  <TableCell>Accounts Payable to Machinery</TableCell>
+                  <TableCell>169 </TableCell>
+                  <TableCell>201</TableCell>
+                  <TableCell></TableCell>
+                </TableBody>
+                <TableBody>
+                  <TableCell>2</TableCell>
+                  <TableCell>trx-acc-wo-map</TableCell>
+                  <TableCell>Accounts Receivable</TableCell>
+                  <TableCell></TableCell>
+                  <TableCell>106</TableCell>
+                  <TableCell></TableCell>
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+          <Box className="modal-footer">
+            <Button
+              variant="contained"
+              color="secondary"
+              fullWidth
+              onClick={sendData}
+              disableElevation
+            >
+              {title.buttonTitle}
+            </Button>
+          </Box>
+        </Card>
+        <Backdrop className={classes.backdrop} open={isLoading}>
+          <CircularProgress color="inherit" />
+        </Backdrop>
+      </Box>
+    </Modal>
+  );
+}

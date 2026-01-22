@@ -1,0 +1,36 @@
+import dynamic from "next/dynamic";
+import { useRouter } from 'next/router'
+import { useEffect } from "react";
+import Loading from "../../components/helper/loading";
+import getRoute from "../../helpers/router";
+import { LOCAL_STORAGE_MESSAGE_TYPE, LOCAL_STORAGE_MESSAGE } from "../../helpers/consts";
+import { isLoggedIn, isPermit } from "../../helpers/general";
+
+const PageLayout = dynamic(() => import('../../components/page/depo/depo-create'), {
+    loading: () => (
+      <Loading />
+    ),
+    ssr: false,
+});
+
+export default function Index() {
+
+    const router = useRouter()
+
+    useEffect(() => {
+        const res = isLoggedIn()
+        if(res) {
+            if (!isPermit("menu","depo")) {
+                localStorage.setItem(LOCAL_STORAGE_MESSAGE_TYPE, "error")
+                localStorage.setItem(LOCAL_STORAGE_MESSAGE, "You don't have permission on DEPO")
+                router.push('/')
+            }
+        } else {
+            router.push(getRoute("auth.login"))
+        }
+    }, []);
+
+    return (
+        <PageLayout />
+    )
+}
