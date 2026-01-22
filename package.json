@@ -59,6 +59,8 @@
     "three.interaction": "^0.2.3",
     "use-places-autocomplete": "^4.0.0",
     "uuid": "^8.3.2",
-    "validator": "^13.7.0"
+    "validator": "^13.7.0",
+    "postcss": "^8.4.38",
+    "autoprefixer": "^10.4.19"
   }
 }
