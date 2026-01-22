@@ -9,7 +9,7 @@
     "export": "next export"
   },
   "engines": {
-  "node": "18.x"
+  "node": "24.x"
 },
   "dependencies": {
     "@emotion/react": "^11.9.3",
